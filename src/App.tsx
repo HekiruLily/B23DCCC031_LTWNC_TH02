@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import SessionBar from './features/session/SessionBar';
 import './App.css';
 
 const LibraryPage = lazy(() => import('./features/library/LibraryPage'));
@@ -69,12 +70,7 @@ function AppContent() {
       </main>
 
       {}
-      <footer className="session-bar-fixed">
-        <div className="session-bar-content">
-          <span className="session-bar-status">Chưa có bài tập nào đang diễn ra</span>
-          <span className="session-bar-hint">Chọn một bài tập từ kho để bắt đầu đếm giờ</span>
-        </div>
-      </footer>
+      <SessionBar />
     </div>
   );
 }

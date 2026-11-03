@@ -31,6 +31,20 @@ describe('ExerciseRow', () => {
     expect(screen.getByRole('button', { name: '+ Buổi tập' })).toBeInTheDocument();
   });
 
+  it('renders star button as ★ with aria-label="Bỏ lưu" when isSaved is true', () => {
+    render(
+      <ExerciseRow
+        index={0}
+        exercise={mockExercise}
+        isSaved={true}
+      />
+    );
+
+    const starBtn = screen.getByRole('button', { name: 'Bỏ lưu' });
+    expect(starBtn).toBeInTheDocument();
+    expect(starBtn).toHaveTextContent('★');
+  });
+
   it('renders exercise information correctly via data prop (react-window style)', () => {
     render(
       <ExerciseRow
@@ -73,4 +87,3 @@ describe('ExerciseRow', () => {
     expect(onAddToSession).toHaveBeenCalledWith(mockExercise);
   });
 });
-

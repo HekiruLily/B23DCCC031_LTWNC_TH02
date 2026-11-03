@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { CSSProperties } from 'react';
 import type { Exercise } from '../../types';
 import { formatDuration } from '../../utils/format';
+import { useSavedStore } from '../saved/useSavedStore';
 
 export interface ExerciseRowData {
   items: Exercise[];
   onStart?: (exercise: Exercise) => void;
   onSave?: (exercise: Exercise) => void;
   onAddToSession?: (exercise: Exercise) => void;
+  isSaved?: (exerciseId: string) => boolean;
 }
 
 export interface ExerciseRowProps {
@@ -15,6 +17,7 @@ export interface ExerciseRowProps {
   style?: CSSProperties;
   data?: ExerciseRowData;
   exercise?: Exercise;
+  isSaved?: boolean;
   onStart?: (exercise: Exercise) => void;
   onSave?: (exercise: Exercise) => void;
   onAddToSession?: (exercise: Exercise) => void;
@@ -25,16 +28,34 @@ export const ExerciseRow = React.memo(function ExerciseRow({
   style,
   data,
   exercise: propExercise,
+  isSaved: propIsSaved,
   onStart: propOnStart,
   onSave: propOnSave,
   onAddToSession: propOnAddToSession,
 }: ExerciseRowProps) {
   const exercise = propExercise ?? data?.items[index];
-  if (!exercise) return null;
+  const exerciseId = exercise?.id ?? '';
 
+  const isSavedInStore = useSavedStore((s) =>
+    exerciseId ? s.ids.includes(exerciseId) : false
+  );
+  const toggleSaveInStore = useSavedStore((s) => s.toggle);
+
+  const isSaved = propIsSaved ?? data?.isSaved?.(exerciseId) ?? isSavedInStore;
   const onStart = propOnStart ?? data?.onStart;
   const onSave = propOnSave ?? data?.onSave;
   const onAddToSession = propOnAddToSession ?? data?.onAddToSession;
+
+  const handleSaveClick = useCallback(() => {
+    if (!exercise) return;
+    if (onSave) {
+      onSave(exercise);
+    } else {
+      toggleSaveInStore(exercise.id);
+    }
+  }, [exercise, onSave, toggleSaveInStore]);
+
+  if (!exercise) return null;
 
   return (
     <div
@@ -67,11 +88,11 @@ export const ExerciseRow = React.memo(function ExerciseRow({
         </button>
         <button
           type="button"
-          className="btn btn-star btn-save"
-          aria-label="Lưu bài tập"
-          onClick={() => onSave?.(exercise)}
+          className={`btn btn-star btn-save ${isSaved ? 'is-saved' : ''}`}
+          aria-label={isSaved ? 'Bỏ lưu' : 'Lưu bài tập'}
+          onClick={handleSaveClick}
         >
-          ☆
+          {isSaved ? '★' : '☆'}
         </button>
         <button
           type="button"
@@ -86,4 +107,3 @@ export const ExerciseRow = React.memo(function ExerciseRow({
 });
 
 export default ExerciseRow;
-

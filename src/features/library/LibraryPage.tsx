@@ -3,6 +3,8 @@ import { FixedSizeList } from 'react-window';
 import { EXERCISES, GROUPS } from '../../data/exercises';
 import type { Exercise, FilterGroup, SortOption } from '../../types';
 import { useDebounce } from '../../hooks/useDebounce';
+import { useSessionStore } from '../session/useSessionStore';
+import { useSavedStore } from '../saved/useSavedStore';
 import ExerciseRow from './ExerciseRow';
 import type { ExerciseRowData } from './ExerciseRow';
 
@@ -10,6 +12,10 @@ export default function LibraryPage() {
   const [search, setSearch] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<FilterGroup>('Tất cả');
   const [sortBy, setSortBy] = useState<SortOption>('default');
+
+  const startSession = useSessionStore((s) => s.startSession);
+  const addToSession = useSessionStore((s) => s.addToSession);
+  const toggleSave = useSavedStore((s) => s.toggle);
 
   const debouncedSearch = useDebounce(search, 300);
 
@@ -39,20 +45,27 @@ export default function LibraryPage() {
     return list;
   }, [debouncedSearch, selectedGroup, sortBy]);
 
-  const handleStart = useCallback((exercise: Exercise) => {
-    
-    void exercise;
-  }, []);
+  const handleStart = useCallback(
+    (exercise: Exercise) => {
+      const index = filteredAndSortedExercises.findIndex((ex) => ex.id === exercise.id);
+      startSession(filteredAndSortedExercises, index >= 0 ? index : 0);
+    },
+    [filteredAndSortedExercises, startSession]
+  );
 
-  const handleSave = useCallback((exercise: Exercise) => {
-    
-    void exercise;
-  }, []);
+  const handleSave = useCallback(
+    (exercise: Exercise) => {
+      toggleSave(exercise.id);
+    },
+    [toggleSave]
+  );
 
-  const handleAddToSession = useCallback((exercise: Exercise) => {
-    
-    void exercise;
-  }, []);
+  const handleAddToSession = useCallback(
+    (exercise: Exercise) => {
+      addToSession(exercise);
+    },
+    [addToSession]
+  );
 
   const itemData = useMemo<ExerciseRowData>(
     () => ({
@@ -158,4 +171,3 @@ export default function LibraryPage() {
     </div>
   );
 }
-
