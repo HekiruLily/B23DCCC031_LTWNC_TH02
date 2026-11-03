@@ -18,7 +18,7 @@ const renderWithProviders = (initialEntries = ['/routines/r1']) => {
   );
 };
 
-describe('RoutineDetailPage', () => {
+describe('Trang RoutineDetailPage chi tiết giáo án', () => {
   beforeEach(() => {
     localStorage.clear();
     useSessionStore.setState({
@@ -26,16 +26,17 @@ describe('RoutineDetailPage', () => {
       currentIndex: -1,
       isRunning: false,
       elapsed: 0,
+      isResting: false,
     });
   });
 
-  it('renders "Không tìm thấy giáo án" when ID is invalid', () => {
+  it('hiển thị thông báo "Không tìm thấy giáo án" khi ID không hợp lệ', () => {
     renderWithProviders(['/routines/non-existent']);
 
     expect(screen.getByText('Không tìm thấy giáo án')).toBeInTheDocument();
   });
 
-  it('renders routine title, exercises, and calculated total duration: 1 phút 37 giây', () => {
+  it('hiển thị tên giáo án, danh sách bài tập và tính đúng tổng thời gian: 1 phút 37 giây', () => {
     localStorage.setItem(
       'workout-routines',
       JSON.stringify([
@@ -51,7 +52,7 @@ describe('RoutineDetailPage', () => {
     expect(screen.getByText('Kéo tạ đơn 1')).toBeInTheDocument();
   });
 
-  it('starts session with all routine exercises when "Tập tất cả" is clicked', async () => {
+  it('bắt đầu buổi tập với tất cả bài tập trong giáo án khi bấm "Tập tất cả"', async () => {
     const user = userEvent.setup();
     localStorage.setItem(
       'workout-routines',
@@ -72,7 +73,7 @@ describe('RoutineDetailPage', () => {
     expect(session.queue[0].id).toBe('e1');
   });
 
-  it('removes an exercise from routine when clicking Bỏ', async () => {
+  it('xóa bài tập khỏi giáo án khi bấm nút Bỏ', async () => {
     const user = userEvent.setup();
     localStorage.setItem(
       'workout-routines',
@@ -91,4 +92,3 @@ describe('RoutineDetailPage', () => {
     expect(screen.getByText(/Tổng thời gian: 1 phút 7 giây/)).toBeInTheDocument();
   });
 });
-

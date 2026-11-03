@@ -6,24 +6,24 @@ import {
   useRoutineDispatch,
 } from './RoutineContext';
 
-describe('RoutineContext', () => {
+describe('Context quản lý giáo án RoutineContext', () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it('throws an error if useRoutines is used outside RoutineProvider', () => {
+  it('báo lỗi rõ ràng nếu useRoutines được gọi ngoài Provider', () => {
     expect(() => renderHook(() => useRoutines())).toThrow(
       'useRoutines must be used within a RoutineProvider'
     );
   });
 
-  it('throws an error if useRoutineDispatch is used outside RoutineProvider', () => {
+  it('báo lỗi rõ ràng nếu useRoutineDispatch được gọi ngoài Provider', () => {
     expect(() => renderHook(() => useRoutineDispatch())).toThrow(
       'useRoutineDispatch must be used within a RoutineProvider'
     );
   });
 
-  it('initializes from localStorage and saves changes to localStorage', () => {
+  it('khởi tạo từ localStorage và lưu lại mỗi khi state thay đổi', () => {
     const saved = [{ id: 'r1', name: 'Ngày ngực', exerciseIds: [] }];
     localStorage.setItem('workout-routines', JSON.stringify(saved));
 
@@ -53,4 +53,3 @@ describe('RoutineContext', () => {
     expect(updatedStorage[1].name).toBe('Ngày chân');
   });
 });
-

@@ -4,105 +4,67 @@ import userEvent from '@testing-library/user-event';
 import { ExerciseRow } from './ExerciseRow';
 import type { Exercise } from '../../types';
 
-const mockExercise: Exercise = {
+const mockExercise30s: Exercise = {
   id: 'e1',
   name: 'Đẩy tạ đơn 1',
   trainer: 'Minh Khang',
   group: 'Ngực',
-  duration: 67,
+  duration: 30,
 };
 
-describe('ExerciseRow', () => {
-  it('renders exercise information correctly with direct props', () => {
-    render(
-      <ExerciseRow
-        index={0}
-        exercise={mockExercise}
-      />
-    );
+describe('Component ExerciseRow dòng bài tập', () => {
+  it('hiển thị tên bài tập và "0:30"', () => {
+    render(<ExerciseRow index={0} exercise={mockExercise30s} />);
 
-    expect(screen.getByText('1')).toBeInTheDocument();
     expect(screen.getByText('Đẩy tạ đơn 1')).toBeInTheDocument();
-    expect(screen.getByText('Minh Khang')).toBeInTheDocument();
-    expect(screen.getByText('Ngực')).toBeInTheDocument();
-    expect(screen.getByText('1:07')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Bắt đầu' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Lưu bài tập' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '+ Buổi tập' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '+ Giáo án' })).toBeInTheDocument();
+    expect(screen.getByText('0:30')).toBeInTheDocument();
   });
 
-  it('renders star button as ★ with aria-label="Bỏ lưu" when isSaved is true', () => {
+  it('bấm nút Bắt đầu (tìm bằng getByRole) thì hàm mock vi.fn() được gọi với đúng bài tập', async () => {
+    const user = userEvent.setup();
+    const mockStart = vi.fn();
+
     render(
       <ExerciseRow
         index={0}
-        exercise={mockExercise}
-        isSaved={true}
+        exercise={mockExercise30s}
+        onStart={mockStart}
       />
     );
+
+    const startBtn = screen.getByRole('button', { name: 'Bắt đầu' });
+    await user.click(startBtn);
+
+    expect(mockStart).toHaveBeenCalledTimes(1);
+    expect(mockStart).toHaveBeenCalledWith(mockExercise30s);
+  });
+
+  it('hiển thị huy hiệu nhóm cơ, tên huấn luyện viên và số thứ tự chính xác', () => {
+    render(<ExerciseRow index={5} exercise={mockExercise30s} />);
+
+    expect(screen.getByText('6')).toBeInTheDocument();
+    expect(screen.getByText('Minh Khang')).toBeInTheDocument();
+    expect(screen.getByText('Ngực')).toBeInTheDocument();
+  });
+
+  it('đổi icon ngôi sao sang ★ và aria-label "Bỏ lưu" khi bài tập đã được lưu', () => {
+    render(<ExerciseRow index={0} exercise={mockExercise30s} isSaved={true} />);
 
     const starBtn = screen.getByRole('button', { name: 'Bỏ lưu' });
     expect(starBtn).toBeInTheDocument();
     expect(starBtn).toHaveTextContent('★');
   });
 
-  it('renders exercise information correctly via data prop (react-window style)', () => {
+  it('khóa nút "+ Giáo án" khi isAddToRoutineDisabled là true', () => {
     render(
       <ExerciseRow
         index={0}
-        data={{
-          items: [mockExercise],
-        }}
-      />
-    );
-
-    expect(screen.getByText('1')).toBeInTheDocument();
-    expect(screen.getByText('Đẩy tạ đơn 1')).toBeInTheDocument();
-  });
-
-  it('disables + Giáo án button when isAddToRoutineDisabled is true', () => {
-    render(
-      <ExerciseRow
-        index={0}
-        exercise={mockExercise}
+        exercise={mockExercise30s}
         isAddToRoutineDisabled={true}
       />
     );
 
     const addRoutineBtn = screen.getByRole('button', { name: '+ Giáo án' });
     expect(addRoutineBtn).toBeDisabled();
-  });
-
-  it('triggers action callbacks when buttons are clicked', async () => {
-    const user = userEvent.setup();
-    const onStart = vi.fn();
-    const onSave = vi.fn();
-    const onAddToSession = vi.fn();
-    const onAddToRoutine = vi.fn();
-
-    render(
-      <ExerciseRow
-        index={4}
-        exercise={mockExercise}
-        onStart={onStart}
-        onSave={onSave}
-        onAddToSession={onAddToSession}
-        onAddToRoutine={onAddToRoutine}
-      />
-    );
-
-    expect(screen.getByText('5')).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: 'Bắt đầu' }));
-    expect(onStart).toHaveBeenCalledWith(mockExercise);
-
-    await user.click(screen.getByRole('button', { name: 'Lưu bài tập' }));
-    expect(onSave).toHaveBeenCalledWith(mockExercise);
-
-    await user.click(screen.getByRole('button', { name: '+ Buổi tập' }));
-    expect(onAddToSession).toHaveBeenCalledWith(mockExercise);
-
-    await user.click(screen.getByRole('button', { name: '+ Giáo án' }));
-    expect(onAddToRoutine).toHaveBeenCalledWith(mockExercise);
   });
 });

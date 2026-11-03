@@ -5,7 +5,7 @@ import SavedPage from './SavedPage';
 import { useSavedStore } from './useSavedStore';
 import { useSessionStore } from '../session/useSessionStore';
 
-describe('SavedPage', () => {
+describe('Trang SavedPage danh sách bài tập đã lưu', () => {
   beforeEach(() => {
     localStorage.clear();
     useSavedStore.setState({ ids: [] });
@@ -14,17 +14,18 @@ describe('SavedPage', () => {
       currentIndex: -1,
       isRunning: false,
       elapsed: 0,
+      isResting: false,
     });
   });
 
-  it('renders "Bạn chưa lưu bài tập nào" when list is empty', () => {
+  it('hiển thị thông báo "Bạn chưa lưu bài tập nào" khi danh sách rỗng', () => {
     render(<SavedPage />);
 
     expect(screen.getByText('Bạn chưa lưu bài tập nào')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Tập tất cả/i })).not.toBeInTheDocument();
   });
 
-  it('renders saved exercises and starts session when clicking "Tập tất cả"', async () => {
+  it('liệt kê các bài tập đã lưu và bắt đầu buổi tập khi bấm "Tập tất cả"', async () => {
     const user = userEvent.setup();
     useSavedStore.setState({ ids: ['e1', 'e2'] });
 
@@ -44,7 +45,7 @@ describe('SavedPage', () => {
     expect(session.isRunning).toBe(true);
   });
 
-  it('unsaves an exercise when star button is clicked', async () => {
+  it('bỏ lưu bài tập khi bấm vào nút ngôi sao', async () => {
     const user = userEvent.setup();
     useSavedStore.setState({ ids: ['e1'] });
 
@@ -59,4 +60,3 @@ describe('SavedPage', () => {
     expect(screen.getByText('Bạn chưa lưu bài tập nào')).toBeInTheDocument();
   });
 });
-

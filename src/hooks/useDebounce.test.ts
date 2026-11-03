@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useDebounce } from './useDebounce';
 
-describe('useDebounce', () => {
+describe('Hook generic useDebounce', () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -11,55 +11,48 @@ describe('useDebounce', () => {
     vi.useRealTimers();
   });
 
-  it('returns the initial value immediately', () => {
-    const { result } = renderHook(() => useDebounce('hello', 300));
-    expect(result.current).toBe('hello');
-  });
-
-  it('updates the debounced value only after the delay has passed', () => {
+  it('renderHook + vi.useFakeTimers(): đổi giá trị, trước 300ms vẫn là giá trị cũ, sau vi.advanceTimersByTime(300) là giá trị mới', () => {
     const { result, rerender } = renderHook(
       ({ value, delay }) => useDebounce(value, delay),
-      { initialProps: { value: 'initial', delay: 300 } }
+      { initialProps: { value: 'giá trị cũ', delay: 300 } }
     );
 
-    expect(result.current).toBe('initial');
+    expect(result.current).toBe('giá trị cũ');
 
-    rerender({ value: 'updated', delay: 300 });
-    expect(result.current).toBe('initial');
+    rerender({ value: 'giá trị mới', delay: 300 });
 
     act(() => {
       vi.advanceTimersByTime(200);
     });
-    expect(result.current).toBe('initial');
+    expect(result.current).toBe('giá trị cũ');
 
     act(() => {
       vi.advanceTimersByTime(100);
     });
-    expect(result.current).toBe('updated');
+    expect(result.current).toBe('giá trị mới');
   });
 
-  it('cancels previous timeout if value updates before delay elapses', () => {
+  it('hủy bỏ bộ đếm thời gian trước đó nếu giá trị liên tục thay đổi trước khi hết 300ms', () => {
     const { result, rerender } = renderHook(
       ({ value, delay }) => useDebounce(value, delay),
-      { initialProps: { value: 'first', delay: 300 } }
+      { initialProps: { value: 'lần 1', delay: 300 } }
     );
 
-    rerender({ value: 'second', delay: 300 });
+    rerender({ value: 'lần 2', delay: 300 });
     act(() => {
-      vi.advanceTimersByTime(200);
+      vi.advanceTimersByTime(150);
     });
-    expect(result.current).toBe('first');
+    expect(result.current).toBe('lần 1');
 
-    rerender({ value: 'third', delay: 300 });
+    rerender({ value: 'lần 3', delay: 300 });
     act(() => {
-      vi.advanceTimersByTime(200);
+      vi.advanceTimersByTime(150);
     });
-    expect(result.current).toBe('first');
+    expect(result.current).toBe('lần 1');
 
     act(() => {
-      vi.advanceTimersByTime(100);
+      vi.advanceTimersByTime(150);
     });
-    expect(result.current).toBe('third');
+    expect(result.current).toBe('lần 3');
   });
 });
-

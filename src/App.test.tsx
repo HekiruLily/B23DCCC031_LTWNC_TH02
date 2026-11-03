@@ -5,7 +5,7 @@ import App from './App';
 import { useSessionStore } from './features/session/useSessionStore';
 import { useSavedStore } from './features/saved/useSavedStore';
 
-describe('App', () => {
+describe('Khung ứng dụng App tích hợp toàn bộ hệ thống', () => {
   beforeEach(() => {
     window.history.pushState({}, '', '/');
     localStorage.clear();
@@ -15,10 +15,11 @@ describe('App', () => {
       currentIndex: -1,
       isRunning: false,
       elapsed: 0,
+      isResting: false,
     });
   });
 
-  it('renders navbar brand and navigation links', async () => {
+  it('hiển thị thanh điều hướng, thương hiệu và các liên kết menu', async () => {
     render(<App />);
 
     expect(screen.getByText('Bấm Giờ Tập Luyện')).toBeInTheDocument();
@@ -33,7 +34,7 @@ describe('App', () => {
     });
   });
 
-  it('navigates to "Đã lưu" and "Giáo án" pages', async () => {
+  it('chuyển trang mượt mà giữa "Đã lưu" và "Giáo án"', async () => {
     const user = userEvent.setup();
     render(<App />);
 
@@ -50,7 +51,7 @@ describe('App', () => {
     });
   });
 
-  it('persists saved exercises and displays them on /saved page', async () => {
+  it('lưu bài tập và hiển thị trên trang /saved', async () => {
     const user = userEvent.setup();
     render(<App />);
 
@@ -82,7 +83,7 @@ describe('App', () => {
     });
   });
 
-  it('toggles theme between dark and light with Giao diện sáng / Giao diện tối button', async () => {
+  it('chuyển đổi giao diện sáng/tối bằng nút trên thanh menu', async () => {
     const user = userEvent.setup();
     render(<App />);
 

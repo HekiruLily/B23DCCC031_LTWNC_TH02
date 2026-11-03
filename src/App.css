@@ -52,7 +52,6 @@
   padding-bottom: 80px; 
 }
 
-
 .app-navbar {
   display: flex;
   align-items: center;
@@ -126,7 +125,7 @@
   background-color: var(--bg-surface-hover);
 }
 
-
+/* Main Content */
 .app-main {
   flex: 1;
   max-width: 1200px;
@@ -136,7 +135,7 @@
   box-sizing: border-box;
 }
 
-
+/* Page Headers */
 .page-header {
   margin-bottom: 1.5rem;
   text-align: left;
@@ -162,7 +161,7 @@
   margin: 0;
 }
 
-
+/* Controls Panel */
 .controls-panel {
   display: flex;
   flex-wrap: wrap;
@@ -221,7 +220,6 @@
   border-color: var(--primary-color);
 }
 
-
 .status-bar {
   text-align: left;
   margin-bottom: 0.75rem;
@@ -256,7 +254,6 @@
   font-weight: 600;
 }
 
-
 .exercise-table-container {
   background-color: var(--bg-surface);
   border-radius: 8px;
@@ -285,7 +282,6 @@
   scrollbar-width: thin;
   scrollbar-color: var(--secondary-color) transparent;
 }
-
 
 .exercise-row {
   display: flex;
@@ -369,7 +365,6 @@
   gap: 0.35rem;
 }
 
-
 .btn {
   display: inline-flex;
   align-items: center;
@@ -442,7 +437,6 @@
   padding: 0.6rem 1.25rem;
   font-size: 0.95rem;
 }
-
 
 .routine-create-section {
   background-color: var(--bg-surface);
@@ -525,7 +519,6 @@
   text-decoration: none;
 }
 
-
 .session-bar-fixed {
   position: fixed;
   bottom: 0;
@@ -566,12 +559,17 @@
   font-size: 0.95rem;
 }
 
+.session-resting {
+  font-weight: 700;
+  color: var(--star-color);
+  font-size: 0.95rem;
+}
+
 .session-not-started {
   color: var(--text-muted);
   font-size: 0.9rem;
   font-style: italic;
 }
-
 
 .session-countdown-wrapper {
   flex: 1.5;
@@ -607,6 +605,10 @@
   transition: width 0.3s ease;
 }
 
+.countdown-progress-fill.fill-rest {
+  background-color: var(--star-color);
+}
+
 .session-controls {
   display: flex;
   align-items: center;
@@ -625,7 +627,6 @@
   color: var(--text-muted);
   white-space: nowrap;
 }
-
 
 .empty-state {
   padding: 3rem 1.5rem;

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { withLogger } from './withLogger';
 
-describe('withLogger middleware', () => {
-  it('returns next state from reducer and logs in DEV mode', () => {
+describe('Middleware withLogger ghi log cho reducer', () => {
+  it('trả về state mới từ reducer gốc và ghi log tên action cùng state trước/sau trong môi trường DEV', () => {
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     const mockReducer = (state: number, action: { type: string }) => {
@@ -21,4 +21,3 @@ describe('withLogger middleware', () => {
     consoleSpy.mockRestore();
   });
 });
-

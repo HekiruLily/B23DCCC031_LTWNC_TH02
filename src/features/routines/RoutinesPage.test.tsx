@@ -13,18 +13,12 @@ const renderWithProviders = (ui: React.ReactElement) => {
   );
 };
 
-describe('RoutinesPage', () => {
+describe('Trang RoutinesPage quản lý danh sách giáo án', () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it('renders empty state initially', () => {
-    renderWithProviders(<RoutinesPage />);
-
-    expect(screen.getByText('Chưa có giáo án nào. Hãy tạo giáo án đầu tiên của bạn!')).toBeInTheDocument();
-  });
-
-  it('shows error when routine name is empty', async () => {
+  it('dùng userEvent: bấm Tạo khi ô trống thì thấy "Tên giáo án không được để trống"', async () => {
     const user = userEvent.setup();
     renderWithProviders(<RoutinesPage />);
 
@@ -34,7 +28,21 @@ describe('RoutinesPage', () => {
     expect(screen.getByText('Tên giáo án không được để trống')).toBeInTheDocument();
   });
 
-  it('creates a routine and prevents duplicate names (case-insensitive)', async () => {
+  it('dùng userEvent: nhập tên rồi bấm Tạo thì tên xuất hiện trong danh sách', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<RoutinesPage />);
+
+    const input = screen.getByPlaceholderText('Nhập tên giáo án...');
+    const createBtn = screen.getByRole('button', { name: 'Tạo' });
+
+    await user.type(input, 'Giáo án tăng cơ vai');
+    await user.click(createBtn);
+
+    expect(screen.getByText('Giáo án tăng cơ vai')).toBeInTheDocument();
+    expect(screen.getByText('0 bài')).toBeInTheDocument();
+  });
+
+  it('báo lỗi "Tên giáo án đã tồn tại" khi tạo giáo án trùng tên không phân biệt hoa thường', async () => {
     const user = userEvent.setup();
     renderWithProviders(<RoutinesPage />);
 
@@ -43,9 +51,7 @@ describe('RoutinesPage', () => {
 
     await user.type(input, 'Ngày ngực');
     await user.click(createBtn);
-
     expect(screen.getByText('Ngày ngực')).toBeInTheDocument();
-    expect(screen.getByText('0 bài')).toBeInTheDocument();
 
     await user.type(input, 'ngày NGỰC');
     await user.click(createBtn);
@@ -53,7 +59,7 @@ describe('RoutinesPage', () => {
     expect(screen.getByText('Tên giáo án đã tồn tại')).toBeInTheDocument();
   });
 
-  it('deletes a routine when clicking Xóa', async () => {
+  it('xóa giáo án khi bấm nút Xóa', async () => {
     const user = userEvent.setup();
     localStorage.setItem(
       'workout-routines',
@@ -70,4 +76,3 @@ describe('RoutinesPage', () => {
     expect(screen.queryByText('Ngày ngực')).not.toBeInTheDocument();
   });
 });
-

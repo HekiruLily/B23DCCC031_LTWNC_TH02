@@ -1,17 +1,17 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { useSavedStore } from './useSavedStore';
 
-describe('useSavedStore', () => {
+describe('Store useSavedStore lưu trữ bài tập đã lưu', () => {
   beforeEach(() => {
     localStorage.clear();
     useSavedStore.setState({ ids: [] });
   });
 
-  it('has empty ids initially', () => {
+  it('khởi tạo với danh sách bài tập đã lưu rỗng', () => {
     expect(useSavedStore.getState().ids).toEqual([]);
   });
 
-  it('toggles ids on and off', () => {
+  it('thêm và bỏ lưu bài tập khi gọi hàm toggle', () => {
     const { toggle } = useSavedStore.getState();
 
     toggle('e1');
@@ -24,7 +24,7 @@ describe('useSavedStore', () => {
     expect(useSavedStore.getState().ids).toEqual(['e2']);
   });
 
-  it('persists to localStorage with key "workout-saved"', () => {
+  it('lưu dữ liệu vào localStorage với key workout-saved', () => {
     const { toggle } = useSavedStore.getState();
     toggle('e1');
     toggle('e3');
@@ -35,4 +35,3 @@ describe('useSavedStore', () => {
     expect(parsed.state.ids).toEqual(['e1', 'e3']);
   });
 });
-
