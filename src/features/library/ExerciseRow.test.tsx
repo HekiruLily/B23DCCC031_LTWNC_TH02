@@ -29,6 +29,7 @@ describe('ExerciseRow', () => {
     expect(screen.getByRole('button', { name: 'Bắt đầu' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Lưu bài tập' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '+ Buổi tập' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '+ Giáo án' })).toBeInTheDocument();
   });
 
   it('renders star button as ★ with aria-label="Bỏ lưu" when isSaved is true', () => {
@@ -59,11 +60,25 @@ describe('ExerciseRow', () => {
     expect(screen.getByText('Đẩy tạ đơn 1')).toBeInTheDocument();
   });
 
+  it('disables + Giáo án button when isAddToRoutineDisabled is true', () => {
+    render(
+      <ExerciseRow
+        index={0}
+        exercise={mockExercise}
+        isAddToRoutineDisabled={true}
+      />
+    );
+
+    const addRoutineBtn = screen.getByRole('button', { name: '+ Giáo án' });
+    expect(addRoutineBtn).toBeDisabled();
+  });
+
   it('triggers action callbacks when buttons are clicked', async () => {
     const user = userEvent.setup();
     const onStart = vi.fn();
     const onSave = vi.fn();
     const onAddToSession = vi.fn();
+    const onAddToRoutine = vi.fn();
 
     render(
       <ExerciseRow
@@ -72,6 +87,7 @@ describe('ExerciseRow', () => {
         onStart={onStart}
         onSave={onSave}
         onAddToSession={onAddToSession}
+        onAddToRoutine={onAddToRoutine}
       />
     );
 
@@ -85,5 +101,8 @@ describe('ExerciseRow', () => {
 
     await user.click(screen.getByRole('button', { name: '+ Buổi tập' }));
     expect(onAddToSession).toHaveBeenCalledWith(mockExercise);
+
+    await user.click(screen.getByRole('button', { name: '+ Giáo án' }));
+    expect(onAddToRoutine).toHaveBeenCalledWith(mockExercise);
   });
 });

@@ -54,7 +54,7 @@ export default function SavedPage() {
         <div>
           <h1 className="page-title">Bài tập đã lưu</h1>
           <p className="page-subtitle">
-            Danh sách các bài tập yêu thích đã được ghi nhớ ({savedExercises.length} bài)
+            ({savedExercises.length} bài)
           </p>
         </div>
         {savedExercises.length > 0 && (

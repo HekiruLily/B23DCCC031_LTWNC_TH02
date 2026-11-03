@@ -9,6 +9,8 @@ export interface ExerciseRowData {
   onStart?: (exercise: Exercise) => void;
   onSave?: (exercise: Exercise) => void;
   onAddToSession?: (exercise: Exercise) => void;
+  onAddToRoutine?: (exercise: Exercise) => void;
+  isAddToRoutineDisabled?: boolean;
   isSaved?: (exerciseId: string) => boolean;
 }
 
@@ -18,9 +20,11 @@ export interface ExerciseRowProps {
   data?: ExerciseRowData;
   exercise?: Exercise;
   isSaved?: boolean;
+  isAddToRoutineDisabled?: boolean;
   onStart?: (exercise: Exercise) => void;
   onSave?: (exercise: Exercise) => void;
   onAddToSession?: (exercise: Exercise) => void;
+  onAddToRoutine?: (exercise: Exercise) => void;
 }
 
 export const ExerciseRow = React.memo(function ExerciseRow({
@@ -29,9 +33,11 @@ export const ExerciseRow = React.memo(function ExerciseRow({
   data,
   exercise: propExercise,
   isSaved: propIsSaved,
+  isAddToRoutineDisabled: propIsAddToRoutineDisabled,
   onStart: propOnStart,
   onSave: propOnSave,
   onAddToSession: propOnAddToSession,
+  onAddToRoutine: propOnAddToRoutine,
 }: ExerciseRowProps) {
   const exercise = propExercise ?? data?.items[index];
   const exerciseId = exercise?.id ?? '';
@@ -45,6 +51,9 @@ export const ExerciseRow = React.memo(function ExerciseRow({
   const onStart = propOnStart ?? data?.onStart;
   const onSave = propOnSave ?? data?.onSave;
   const onAddToSession = propOnAddToSession ?? data?.onAddToSession;
+  const onAddToRoutine = propOnAddToRoutine ?? data?.onAddToRoutine;
+  const isAddToRoutineDisabled =
+    propIsAddToRoutineDisabled ?? data?.isAddToRoutineDisabled ?? false;
 
   const handleSaveClick = useCallback(() => {
     if (!exercise) return;
@@ -100,6 +109,14 @@ export const ExerciseRow = React.memo(function ExerciseRow({
           onClick={() => onAddToSession?.(exercise)}
         >
           + Buổi tập
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary btn-add-routine"
+          disabled={isAddToRoutineDisabled}
+          onClick={() => onAddToRoutine?.(exercise)}
+        >
+          + Giáo án
         </button>
       </div>
     </div>

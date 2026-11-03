@@ -3,10 +3,16 @@ import { render, screen, act, fireEvent } from '@testing-library/react';
 import LibraryPage from './LibraryPage';
 import { useSessionStore } from '../session/useSessionStore';
 import { useSavedStore } from '../saved/useSavedStore';
+import { RoutineProvider } from '../routines/RoutineContext';
+
+const renderWithRoutine = (ui: React.ReactElement) => {
+  return render(<RoutineProvider>{ui}</RoutineProvider>);
+};
 
 describe('LibraryPage', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    localStorage.clear();
     useSessionStore.setState({
       queue: [],
       currentIndex: -1,
@@ -21,7 +27,7 @@ describe('LibraryPage', () => {
   });
 
   it('initially renders "Tìm thấy 10000 bài tập" and only a limited number of rows in DOM', () => {
-    render(<LibraryPage />);
+    renderWithRoutine(<LibraryPage />);
 
     expect(screen.getByText('Tìm thấy 10000 bài tập')).toBeInTheDocument();
 
@@ -33,7 +39,7 @@ describe('LibraryPage', () => {
   });
 
   it('debounces search by 300ms when typing "đẩy"', () => {
-    render(<LibraryPage />);
+    renderWithRoutine(<LibraryPage />);
 
     const searchInput = screen.getByLabelText('Tìm kiếm');
     fireEvent.change(searchInput, { target: { value: 'đẩy' } });
@@ -48,7 +54,7 @@ describe('LibraryPage', () => {
   });
 
   it('filters by muscle group "Vai" while keeping search "đẩy"', () => {
-    render(<LibraryPage />);
+    renderWithRoutine(<LibraryPage />);
 
     const searchInput = screen.getByLabelText('Tìm kiếm');
     fireEvent.change(searchInput, { target: { value: 'đẩy' } });
@@ -64,7 +70,7 @@ describe('LibraryPage', () => {
   });
 
   it('clears search, selects "Tất cả", types "đức anh" to find 1000 exercises by trainer', () => {
-    render(<LibraryPage />);
+    renderWithRoutine(<LibraryPage />);
 
     const searchInput = screen.getByLabelText('Tìm kiếm');
     const groupSelect = screen.getByLabelText('Nhóm cơ');
@@ -80,7 +86,7 @@ describe('LibraryPage', () => {
   });
 
   it('displays "Không tìm thấy bài tập nào" when search has no matches like "xyz"', () => {
-    render(<LibraryPage />);
+    renderWithRoutine(<LibraryPage />);
 
     const searchInput = screen.getByLabelText('Tìm kiếm');
     fireEvent.change(searchInput, { target: { value: 'xyz' } });
@@ -94,7 +100,7 @@ describe('LibraryPage', () => {
   });
 
   it('sorts alphabetically by name (Tên A–Z) with first row being "Bật chậm 1"', () => {
-    render(<LibraryPage />);
+    renderWithRoutine(<LibraryPage />);
 
     const sortSelect = screen.getByLabelText('Sắp xếp');
     fireEvent.change(sortSelect, { target: { value: 'name-asc' } });
@@ -104,7 +110,7 @@ describe('LibraryPage', () => {
   });
 
   it('sorts by duration ascending (Thời lượng tăng dần)', () => {
-    render(<LibraryPage />);
+    renderWithRoutine(<LibraryPage />);
 
     const sortSelect = screen.getByLabelText('Sắp xếp');
     fireEvent.change(sortSelect, { target: { value: 'duration-asc' } });
@@ -116,9 +122,8 @@ describe('LibraryPage', () => {
   });
 
   it('starts session when clicking "Bắt đầu" at a row with current filtered/sorted list', () => {
-    render(<LibraryPage />);
+    renderWithRoutine(<LibraryPage />);
 
-    
     const e2Row = screen.getByTestId('exercise-row-e2');
     const startBtn = e2Row.querySelector('.btn-start');
     expect(startBtn).not.toBeNull();
@@ -132,7 +137,7 @@ describe('LibraryPage', () => {
   });
 
   it('starts session with filtered list when search is active and advances to next filtered exercise', () => {
-    render(<LibraryPage />);
+    renderWithRoutine(<LibraryPage />);
 
     const searchInput = screen.getByLabelText('Tìm kiếm');
     fireEvent.change(searchInput, { target: { value: 'đẩy' } });
@@ -140,7 +145,6 @@ describe('LibraryPage', () => {
       vi.advanceTimersByTime(300);
     });
 
-    
     const startBtns = screen.getAllByRole('button', { name: 'Bắt đầu' });
     fireEvent.click(startBtns[0]);
 
@@ -150,7 +154,6 @@ describe('LibraryPage', () => {
     expect(session.isRunning).toBe(true);
     expect(session.queue[0].name).toContain('Đẩy');
 
-    
     session.next();
     const nextSession = useSessionStore.getState();
     expect(nextSession.currentIndex).toBe(1);
@@ -158,21 +161,45 @@ describe('LibraryPage', () => {
   });
 
   it('adds exercise to session queue when clicking "+ Buổi tập"', () => {
-    render(<LibraryPage />);
+    renderWithRoutine(<LibraryPage />);
 
     const addBtns = screen.getAllByRole('button', { name: '+ Buổi tập' });
-    fireEvent.click(addBtns[0]); 
+    fireEvent.click(addBtns[0]);
 
     expect(useSessionStore.getState().queue).toHaveLength(1);
     expect(useSessionStore.getState().queue[0].id).toBe('e1');
   });
 
   it('toggles save status when clicking star button on a row', () => {
-    render(<LibraryPage />);
+    renderWithRoutine(<LibraryPage />);
 
     const starBtns = screen.getAllByRole('button', { name: 'Lưu bài tập' });
-    fireEvent.click(starBtns[0]); 
+    fireEvent.click(starBtns[0]);
 
     expect(useSavedStore.getState().ids).toEqual(['e1']);
+  });
+
+  it('disables "+ Giáo án" when no routine exists, and adds exercise when routine exists', () => {
+    const { unmount } = renderWithRoutine(<LibraryPage />);
+    const routineSelect = screen.getByLabelText('Giáo án đang chọn');
+    expect(routineSelect).toBeDisabled();
+
+    const addRoutineBtns = screen.getAllByRole('button', { name: '+ Giáo án' });
+    expect(addRoutineBtns[0]).toBeDisabled();
+    unmount();
+
+    localStorage.setItem(
+      'workout-routines',
+      JSON.stringify([{ id: 'r1', name: 'Ngày ngực', exerciseIds: [] }])
+    );
+    renderWithRoutine(<LibraryPage />);
+
+    const enabledAddBtns = screen.getAllByRole('button', { name: '+ Giáo án' });
+    expect(enabledAddBtns[0]).not.toBeDisabled();
+
+    fireEvent.click(enabledAddBtns[0]);
+
+    const stored = JSON.parse(localStorage.getItem('workout-routines')!);
+    expect(stored[0].exerciseIds).toContain('e1');
   });
 });

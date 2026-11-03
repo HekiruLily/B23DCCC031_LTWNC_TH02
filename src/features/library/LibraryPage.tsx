@@ -1,10 +1,11 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { FixedSizeList } from 'react-window';
 import { EXERCISES, GROUPS } from '../../data/exercises';
 import type { Exercise, FilterGroup, SortOption } from '../../types';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useSessionStore } from '../session/useSessionStore';
 import { useSavedStore } from '../saved/useSavedStore';
+import { useRoutines, useRoutineDispatch } from '../routines/RoutineContext';
 import ExerciseRow from './ExerciseRow';
 import type { ExerciseRowData } from './ExerciseRow';
 
@@ -12,10 +13,24 @@ export default function LibraryPage() {
   const [search, setSearch] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<FilterGroup>('Tất cả');
   const [sortBy, setSortBy] = useState<SortOption>('default');
+  const [selectedRoutineId, setSelectedRoutineId] = useState<string>('');
+
+  const routines = useRoutines();
+  const dispatchRoutine = useRoutineDispatch();
 
   const startSession = useSessionStore((s) => s.startSession);
   const addToSession = useSessionStore((s) => s.addToSession);
   const toggleSave = useSavedStore((s) => s.toggle);
+
+  useEffect(() => {
+    if (routines.length > 0) {
+      if (!selectedRoutineId || !routines.some((r) => r.id === selectedRoutineId)) {
+        setSelectedRoutineId(routines[0].id);
+      }
+    } else {
+      setSelectedRoutineId('');
+    }
+  }, [routines, selectedRoutineId]);
 
   const debouncedSearch = useDebounce(search, 300);
 
@@ -67,14 +82,36 @@ export default function LibraryPage() {
     [addToSession]
   );
 
+  const handleAddToRoutine = useCallback(
+    (exercise: Exercise) => {
+      if (!selectedRoutineId) return;
+      dispatchRoutine({
+        type: 'addExercise',
+        payload: { routineId: selectedRoutineId, exerciseId: exercise.id },
+      });
+    },
+    [selectedRoutineId, dispatchRoutine]
+  );
+
+  const isAddToRoutineDisabled = !selectedRoutineId || routines.length === 0;
+
   const itemData = useMemo<ExerciseRowData>(
     () => ({
       items: filteredAndSortedExercises,
       onStart: handleStart,
       onSave: handleSave,
       onAddToSession: handleAddToSession,
+      onAddToRoutine: handleAddToRoutine,
+      isAddToRoutineDisabled,
     }),
-    [filteredAndSortedExercises, handleStart, handleSave, handleAddToSession]
+    [
+      filteredAndSortedExercises,
+      handleStart,
+      handleSave,
+      handleAddToSession,
+      handleAddToRoutine,
+      isAddToRoutineDisabled,
+    ]
   );
 
   const itemKey = useCallback(
@@ -86,7 +123,6 @@ export default function LibraryPage() {
     <div className="library-page">
       <header className="page-header">
         <h1 className="page-title">Kho bài tập</h1>
-        <p className="page-subtitle">Khám phá và lựa chọn từ hơn 10.000 bài tập gym chuyên nghiệp</p>
       </header>
 
       <section className="controls-panel" aria-label="Bộ lọc và tìm kiếm">
@@ -130,6 +166,27 @@ export default function LibraryPage() {
             <option value="default">Mặc định</option>
             <option value="name-asc">Tên A–Z</option>
             <option value="duration-asc">Thời lượng tăng dần</option>
+          </select>
+        </div>
+
+        <div className="control-group">
+          <label htmlFor="routine-select">Giáo án đang chọn</label>
+          <select
+            id="routine-select"
+            className="input-select"
+            value={selectedRoutineId}
+            onChange={(e) => setSelectedRoutineId(e.target.value)}
+            disabled={routines.length === 0}
+          >
+            {routines.length === 0 ? (
+              <option value="">(Chưa có giáo án)</option>
+            ) : (
+              routines.map((routine) => (
+                <option key={routine.id} value={routine.id}>
+                  {routine.name}
+                </option>
+              ))
+            )}
           </select>
         </div>
       </section>

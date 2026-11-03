@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { RoutineProvider } from './features/routines/RoutineContext';
 import SessionBar from './features/session/SessionBar';
 import './App.css';
 
@@ -51,15 +52,14 @@ function AppContent() {
             type="button"
             className="theme-toggle-btn"
             onClick={toggleTheme}
-            title={`Chuyển sang giao diện ${theme === 'dark' ? 'sáng' : 'tối'}`}
           >
-            {theme === 'dark' ? '☀️ Sáng' : '🌙 Tối'}
+            {theme === 'dark' ? 'Giao diện sáng' : 'Giao diện tối'}
           </button>
         </div>
       </header>
 
       <main className="app-main">
-        <Suspense fallback={<div className="loading-state">Đang tải trang...</div>}>
+        <Suspense fallback={<p>Đang tải trang...</p>}>
           <Routes>
             <Route path="/" element={<LibraryPage />} />
             <Route path="/saved" element={<SavedPage />} />
@@ -78,9 +78,11 @@ function AppContent() {
 export default function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
+      <RoutineProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </RoutineProvider>
     </ThemeProvider>
   );
 }
